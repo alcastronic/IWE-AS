@@ -74,7 +74,7 @@ class PrimaryCaps(nn.Module):
 class DigitCaps(nn.Module):
     """Digit capsule layer."""
 
-    def __init__(self, in_dim, in_caps, num_caps, dim_caps, num_routing, device='cpu'):
+    def __init__(self, in_dim, in_caps, num_caps, dim_caps, num_routing):
         """
         Initialize the layer.
 
@@ -91,7 +91,7 @@ class DigitCaps(nn.Module):
         self.num_caps = num_caps
         self.dim_caps = dim_caps
         self.num_routing = num_routing
-        self.device = device
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.W = nn.Parameter(0.01 * torch.randn(1, num_caps, in_caps, dim_caps, in_dim),
                               requires_grad=True)
 
@@ -178,7 +178,7 @@ class CapsNet(nn.Module):
 
         # Shape of logits: (batch_size, num_capsules)
         logits = torch.norm(out, dim=-1)
-        pred = torch.eye(10).index_select(dim=0, index=torch.argmax(logits, dim=1))
+        pred = torch.eye(10, device=logits.device).index_select(dim=0, index=torch.argmax(logits, dim=1))
 
         # Reconstruction
         batch_size = out.shape[0]

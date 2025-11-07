@@ -16,6 +16,7 @@ class Model(nn.Module):
         self.capsureNet = CapsNet()
         self.fc = FCNet(dense_dim, num_classes)
         self.softmax = nn.Softmax(dim=1)
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     def get_Mvs(self, adaptive_segments):
         '''
@@ -25,7 +26,7 @@ class Model(nn.Module):
         '''
         mvs = []
         for adaptive_segment in adaptive_segments:
-            adaptive_segment = adaptive_segment.to(self.device)
+            adaptive_segment = adaptive_segment.to(self.device) # was
             # adaptive_segment: segmengts result, (n, l, d)
             # print('adaptive segment: ', adaptive_segment.shape)
             c = adaptive_segment.shape[0]

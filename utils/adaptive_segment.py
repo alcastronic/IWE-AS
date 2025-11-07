@@ -41,10 +41,13 @@ def conv_batch(batch_list, unit_channel=256):
     '''
     unified_batch = []
     for x in batch_list:
+        device = x.device
         inp_channel = x.shape[0]
         # weights = torch.rand(1, inp_channel, 3, 3)
         weights = torch.ones(unit_channel, inp_channel, 3, 3)
+        weights = weights.to(device)
         b = torch.ones(unit_channel)
+        b = b.to(device)
         out = F.conv2d(input=x, weight=weights, bias=b, stride=1, padding=1) # out: (1, unit_channel, l, d)
         unified_batch.append(out)
     return unified_batch

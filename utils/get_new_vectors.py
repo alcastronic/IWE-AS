@@ -1,7 +1,7 @@
 import jieba
 import math
 import numpy as np
-from torchtext.vocab import Vocab, vocab
+#from torchtext.vocab import Vocab, vocab
 from collections import Counter, OrderedDict
 
 
@@ -15,8 +15,13 @@ def preprocess_text(content_lines, sentences, stopwords):
             sentences.append(list(segs)) # ['中国', '是', '一个', '伟大', '的', '国家']
             # cate.append(str(category))
         except Exception as e:
-            print(e) 
+            print(e)
             continue
+
+
+# def preprocess_english_text(content_lines, sentences, stopwords):
+#     for line in content_lines:
+#         try:
 
 
 def extractSubwords(word):
@@ -24,7 +29,7 @@ def extractSubwords(word):
 
 
 def replace_vector(word, w2v_model, d):
-    ''' 
+    '''
     如果word不存在于词表中，就找他的子词，选取第一个存在于词表的子词的嵌入向量作为返回结果；如果都没有，返回一个随机向量
     '''
     vector = np.random.rand(d)
@@ -36,9 +41,9 @@ def replace_vector(word, w2v_model, d):
 
 
 def getWord2vec(documents, w2v_model):
-    ''' 
+    '''
     Transfer each word in all documents to vector.
-    documents: a two dimension list, each element is a whole document which contains lots of words, 
+    documents: a two dimension list, each element is a whole document which contains lots of words,
                 e.g. [['西江月', '夜行', '黄沙道', '中'], ['黄鹤楼', '送', '孟浩然', '之', '广陵'], ...]
     w2v_model: pretrained Word2Vec model
     return a list of two dimension numpy array, each numpy array refer to a document
@@ -51,7 +56,7 @@ def getWord2vec(documents, w2v_model):
 
 
 def getPositionEncoding(vectors, d):
-    ''' 
+    '''
     Calculate the position encodes of vectors which refer to all documents.
     vectors: a list of two dimension numpy array, (length, d)
     d: word embedding dimension
@@ -81,11 +86,13 @@ def getTdfs(sentences):
     corpora = Counter([w for item in sentences for w in item])
     sorted_by_freq_tuples = sorted(corpora.items(), key=lambda x:x[1], reverse=True)
 
-    ordered_dict = OrderedDict(sorted_by_freq_tuples)
-    vocabulary = vocab(ordered_dict) # 转词表
-    word2idx = vocabulary.get_stoi() # 按频率排序的字典{词: 编号}
-    words = vocabulary.get_itos() # 按频率排序的词
-    
+    # ordered_dict = OrderedDict(sorted_by_freq_tuples)
+    # vocabulary = vocab(ordered_dict) # 转词表
+    # word2idx = vocabulary.get_stoi() # 按频率排序的字典{词: 编号}
+    # words = vocabulary.get_itos() # 按频率排序的词
+    word2idx = {word: idx for idx, (word, _) in enumerate(sorted_by_freq_tuples)}
+    words = [word for word, _ in sorted_by_freq_tuples]
+
     T = len(sentences)
     N = len(words)
 
@@ -117,10 +124,10 @@ def getTdfs(sentences):
     # tdf = np.e ** tdf
     # total = np.sum(tdf)
     # tdf = tdf / total
-    
+
     # print('词频排序 words: ', words)
     # print('原始tdf值: ', tdf)
-    
+
     tdfs = []
     for idx, document in enumerate(sentences):
         # print(idx, document, dicts[idx])
@@ -131,7 +138,7 @@ def getTdfs(sentences):
 
 
 def get_new_wordvec(vectors, positions, tdfs, thresh=0.):
-    ''' 
+    '''
     Get the new word vector, which is the result of initial word vector, position encoding and tdfs.
     '''
     new_wordvecs = []

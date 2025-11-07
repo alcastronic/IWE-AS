@@ -1,4 +1,7 @@
 import torch
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from model.classifier import Model
@@ -14,12 +17,13 @@ from sklearn.metrics import classification_report
 
 
 # 读取数据集索引文件
-file_list = np.loadtxt(fname='./data/THUCNews_test.csv', delimiter=' ', dtype=str, encoding='utf-8')
-#file_list = np.loadtxt(fname='./data/test.csv', delimiter=' ', dtype=str, encoding='utf-8')
+#file_list = np.loadtxt(fname='./data/THUCNews_train.csv', delimiter=' ', dtype=str, encoding='utf-8')
+file_list = np.loadtxt(fname='./data/test.csv', delimiter=' ', dtype=str, encoding='utf-8')
 
 # 读取预训练好的词向量
-VECTOR_DIR = './sgns.target.word-word.dynwin5.thr10.neg5.dim300.iter5.bz2'
-w2v_model = gensim.models.KeyedVectors.load_word2vec_format(VECTOR_DIR, binary=False)
+#VECTOR_DIR = './sgns.target.word-word.dynwin5.thr10.neg5.dim300.iter5.bz2'
+VECTOR_DIR= './GoogleNews-vectors-negative300.bin'
+w2v_model = gensim.models.KeyedVectors.load_word2vec_format(VECTOR_DIR, binary=True)
 with open('stopwords.txt','r',encoding='utf-8') as file:
     stopwords=file.readlines()
 
@@ -33,8 +37,8 @@ if not os.path.isdir(prepath):
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 #device = 'cpu'
 #warnings.filterwarnings('ignore')
-# model = Model(unit_channel=256, dense_dim=64, num_classes=14, device=device)
-model: nn.Module = torch.load(f=prepath+'/model_final.pt', map_location=device)
+model = Model(unit_channel=256, dense_dim=64, num_classes=14)
+#model: nn.Module = torch.load(f=prepath+'/model_final.pt', map_location=device)
 model = model.to(device)
 model.eval()
 text_dataset = TextDataset(file_list=file_list, stopwords=stopwords)
